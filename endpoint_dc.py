@@ -2,7 +2,10 @@ import requests
 import pprint, json
 
 class EndpointDC:
-    postal_code = ""
+    
+
+    def __init__(self, postal_code):
+        self.postal_code = postal_code
 
     def search_item(self, item):
         # get endpoint json data from url
@@ -11,8 +14,33 @@ class EndpointDC:
         response.raise_for_status()
 
         # temporarily put json data into a file 
-        data = response.json()
-        with open("flipp_json.json", "w") as file:
-            json.dump(data, file, indent=4)
+        webpage_data = response.json()
+        return webpage_data
+    
+    def process_json(self, json_data):
+        filtered_items = []
+        items = json_data["items"]
 
-# pprint.pprint()
+        for item in items:
+            filtered_item = {
+                "name" : item["name"],
+                "current_price" : item["current_price"],
+                "clean_image_url" : item["clean_image_url"],
+                "clipping_image_url" : item["clipping_image_url"]
+            }
+            filtered_items.append(filtered_item)
+
+        with open("flipp_json.json", "w") as file:
+            json.dump(filtered_items, file, indent=4)
+            
+        pprint.pprint(filtered_items)
+    
+    
+
+
+endpoint = EndpointDC("K2T1J1")
+data = endpoint.search_item("eggs")
+items = endpoint.process_json(data)
+        
+        
+
