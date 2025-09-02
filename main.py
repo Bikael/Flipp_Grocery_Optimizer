@@ -18,6 +18,6 @@ if __name__ == "__main__":
 
     parsed_gl = lh.parse_grocery_list(content)
     print(parsed_gl)
-    
+
 
     
