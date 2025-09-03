@@ -1,10 +1,13 @@
 import requests
 import pprint, json
+import spacy
 
 class EndpointDC:
     
-    def __init__(self, postal_code):
+    def __init__(self, postal_code, grocery_list):
         self.postal_code = postal_code
+        self.grocery_list = grocery_list
+        
 
     def search_item(self, item):
         # get endpoint json data from url
@@ -20,6 +23,7 @@ class EndpointDC:
         filtered_items = []
         items = json_data["items"]
 
+        # Filter out neccessary fields 
         for item in items:
             filtered_item = {
                 "name" : item["name"], 
@@ -30,29 +34,33 @@ class EndpointDC:
             }
             filtered_items.append(filtered_item)
 
-        with open("flipp_json.json", "w") as file:
-            json.dump(filtered_items, file, indent=4)
-            
-        pprint.pprint(filtered_items)
-
         return filtered_items
 
     def find_cheapest_item(self, items): 
-        
         cheapest_items = [items[0]]
-        
+        # Find cheapest flyers for respective item
         for item in items:
-            print(cheapest_items[0]["current_price"])
             if item["current_price"] != None and item["current_price"] < cheapest_items[0]["current_price"]:
                 cheapest_items = [item]
             elif cheapest_items[0]["current_price"] == item["current_price"]:
                 cheapest_items.append(item)
-
-
-        print(cheapest_items)
         return cheapest_items
     
-    
+
+    def create_cheapest_list(self):
+        final_list = []
+        for item in self.grocery_list:
+            data = self.search_item(item)
+            items = self.process_json(data)
+            cheapest_item = self.find_cheapest_item(items)
+            final_list.append(cheapest_item)
+        
+        return final_list
+
+        
+        
+        
+        
         
 
             
