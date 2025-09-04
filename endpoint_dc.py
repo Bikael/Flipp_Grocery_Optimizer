@@ -56,12 +56,19 @@ class EndpointDC:
             final_list.append(cheapest_item)
         
         return final_list
+  
+    def store_filter(self, grocery_list, desired_stores):
+        filtered_list = []
+        for item in grocery_list:
+            if item["merchant"] in desired_stores:
+                filtered_list.append(item["merchant"])
 
-        
-        
-        
-        
-        
+        return filtered_list
+    
+    
+
+    
+
 
             
         
