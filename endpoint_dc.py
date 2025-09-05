@@ -56,19 +56,40 @@ class EndpointDC:
             final_list.append(cheapest_item)
         
         return final_list
-  
-    def store_filter(self, grocery_list, desired_stores):
-        filtered_list = []
-        for item in grocery_list:
-            if item["merchant"] in desired_stores:
-                filtered_list.append(item["merchant"])
-
-        return filtered_list
     
+    def get_flyers(self, store):
+        # get endpoint json data from url
+        url = f"https://backflipp.wishabi.com/flipp/items/search?locale=en-ca&postal_code={self.postal_code}&q={store}"
+        response = requests.get(url)
+        response.raise_for_status()
+
+        # temporarily put json data into a file 
+        webpage_data = response.json()
+        flyers = webpage_data["flyers"]
+
+        return flyers
+    
+    def get_flyer_ids(self, flyers):
+        ids = []
+        for flyer in flyers:
+            ids.append(flyer["id"])
+        return ids
+    
+    def get_flyer_data(self, flyer_ids):
+        flyer_data = []
+        for id in flyer_ids:
+            url = f"https://backflipp.wishabi.com/flipp/flyers/{id}?locale=en-ca"
+            response = requests.get(url)
+            response.raise_for_status()
+            webpage_data = response.json()
+            
+            flyer_data.append(webpage_data["items"])
+        
+        json.dumps(flyer_data, indent=4)
+        return flyer_data
     
 
     
-
 
             
         
