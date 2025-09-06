@@ -1,6 +1,6 @@
 import requests
-import pprint, json
-import spacy
+import json
+
 
 class EndpointDC:
     
@@ -14,14 +14,18 @@ class EndpointDC:
         # Filter out neccessary fields, Subject to change depending on what fields are required
         for item in json_data:
             filtered_item = {
-                "name" : item["name"], 
-                "price" : item["price"]
+                "name" : item["name"],
+                "price" : item["price"],
+                "cutout_image_url" : item["cutout_image_url"],
+                "valid_from": item["valid_from"],
+                "valid_to": item["valid_to"]
             }
             filtered_items.append(filtered_item)
-
         return filtered_items
     
-    def get_flyers(self, store):
+    def get_flyer_ids(self, store):
+
+        ids = []
         # get endpoint json data from url
         url = f"https://backflipp.wishabi.com/flipp/items/search?locale=en-ca&postal_code={self.postal_code}&q={store}"
         response = requests.get(url)
@@ -31,13 +35,10 @@ class EndpointDC:
         webpage_data = response.json()
         flyers = webpage_data["flyers"]
 
-        return flyers
-    
-    def get_flyer_ids(self, flyers):
-        ids = []
         for flyer in flyers:
             ids.append(flyer["id"])
         return ids
+
     
     def get_flyer_data(self, flyer_ids):
         flyer_data = []
@@ -46,7 +47,6 @@ class EndpointDC:
             response = requests.get(url)
             response.raise_for_status()
             webpage_data = response.json()
-
             flyer_data += webpage_data["items"]
         
         json.dumps(flyer_data, indent=4)
