@@ -207,4 +207,4 @@ marimo/_lsp/
 __marimo__/
 
 # manual additions
-test_endpoint_dc.py
+test*
