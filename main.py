@@ -22,10 +22,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"An error occurred: {e}")
 
-    parsed_gl = lh.parse_grocery_list(content)
-    endpoint = dc.EndpointDC(postal_code, parsed_gl)
-    final_lsit = endpoint.create_cheapest_list()
-    pprint.pprint(final_lsit)
 
 
     
