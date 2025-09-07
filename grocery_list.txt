@@ -1,5 +1,0 @@
-eggs 
-bacon
-milk 
-sourdough
-baguette
