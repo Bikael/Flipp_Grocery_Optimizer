@@ -21,7 +21,7 @@ class EndpointDC:
 
         return filtered_items
     
-    def get_flyers(self, store):
+    def search_flyers(self, store):
         # get endpoint json data from url
         url = f"https://backflipp.wishabi.com/flipp/items/search?locale=en-ca&postal_code={self.postal_code}&q={store}"
         response = requests.get(url)
@@ -50,4 +50,15 @@ class EndpointDC:
             flyer_data += webpage_data["items"]
         
         json.dumps(flyer_data, indent=4)
-        return flyer_data    
+        return flyer_data  
+
+    def get_flyer_items(self, stores:list):
+        all_items = []
+        for store in stores:
+            flyers = self.search_flyers(store)
+            flyer_ids = self.get_flyer_ids(flyers)
+            flyer_data = self.get_flyer_data(flyer_ids)
+            parsed_flyer_data = self.process_json(flyer_data)
+            all_items += parsed_flyer_data
+
+        return parsed_flyer_data
