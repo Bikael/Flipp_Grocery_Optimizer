@@ -1,4 +1,6 @@
 import psycopg2
+import pprint
+from endpoint_dc import EndpointDC
 
 
 def create_connection():
@@ -6,14 +8,23 @@ def create_connection():
     return conn
 
 
+def drop_tables(conn):
+    cursor = conn.cursor()
+    cursor.execute("""
+    DROP TABLE IF EXISTS grocery_lists;
+    DROP TABLE IF EXISTS flyer_items;
+    DROP TABLE IF EXISTS stores;              
+    """)
+    conn.commit()
+    cursor.close()
+
 def create_tables(conn):
     cursor = conn.cursor()
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS stores (
         id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
-        postal_code TEXT
+        name TEXT NOT NULL
     )
     """)
 
@@ -24,7 +35,9 @@ def create_tables(conn):
         flyer_id TEXT,
         name TEXT NOT NULL,
         price REAL NOT NULL,
-        expiry_date DATE
+        valid_from DATE,
+        valid_to DATE,
+        cutout_image TEXT
     )
     """)
 
@@ -38,45 +51,41 @@ def create_tables(conn):
     conn.commit()
     cursor.close()
 
-def insert_store(conn, name, postal_code=None):
+def insert_store(conn, name):
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO stores (name, postal_code)
-        VALUES (%s, %s)
+        INSERT INTO stores (name)
+        VALUES (%s)
         RETURNING id;
-    """, (name, postal_code))
+    """, (name,))
     store_id = cursor.fetchone()[0]
     conn.commit()
     cursor.close()
     return store_id
 
-def insert_flyer_item(conn, store_id, flyer_id, name, price, expiry_date=None):
+def insert_flyer_item(conn, store_id, flyer_id, name, price, valid_from, valid_to, cutout_image):
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO flyer_items (store_id, flyer_id, name, price, expiry_date)
-        VALUES (%s, %s, %s, %s, %s);
-    """, (store_id, flyer_id, name, price, expiry_date))
+        INSERT INTO flyer_items (store_id, flyer_id, name, price, valid_from, valid_to, cutout_image)
+        VALUES (%s, %s, %s, %s, %s, %s, %s);
+    """, (store_id, flyer_id, name, price, valid_from, valid_to, cutout_image))
     conn.commit()
     cursor.close()
 
-def find_best_deals(conn, grocery_item):
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT stores.name, flyer_items.name, flyer_items.price
-        FROM flyer_items
-        JOIN stores ON flyer_items.store_id = stores.id
-        WHERE flyer_items.name ILIKE %s
-        ORDER BY flyer_items.price ASC
-        LIMIT 5;
-    """, (f"%{grocery_item}%",))
-    results = cursor.fetchall()
-    cursor.close()
-    return results
 
-conn = create_connection()
-create_tables(conn)
+def populate_tables():
+    conn = create_connection()
 
-store_id = insert_store(conn, "Walmart", "K1A0B1")
-insert_flyer_item(conn, store_id, "flyer123", "2% Milk 4L", 3.99, "2025-10-10")
+    drop_tables(conn)
+    create_tables(conn)
 
-print(find_best_deals(conn, "Milk"))
+    dc = EndpointDC("K2T1J1") 
+    flyer_ids = dc.get_flyer_ids("walmart")
+    processed_flyer_data = []
+    for id in flyer_ids:
+        flyer_data = dc.get_flyer_data(id)
+        processed_flyer_data += dc.process_json(flyer_data, id)
+
+    store_id = insert_store(conn, "Walmart")
+    for item in processed_flyer_data:
+        insert_flyer_item(conn, store_id, item["flyer_id"], item["name"],item["price"], item["valid_from"], item["valid_to"], item["cutout_image_url"])
