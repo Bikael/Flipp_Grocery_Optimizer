@@ -16,6 +16,9 @@ if __name__ == "__main__":
 
 
     database = db.Database(postal_code,host,dbname,user,password,port)
+    database.display_flyer_items('Walmart')
+    
+
 
 
 

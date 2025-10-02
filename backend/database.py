@@ -74,6 +74,23 @@ class Database:
         conn.commit()
         cursor.close()
 
+    def display_flyer_items(self, store):
+        conn = self.create_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT * 
+            FROM flyer_items
+            WHERE store_id = (SELECT id FROM stores WHERE name = %s)
+        """, (store,))
+        
+        rows = cursor.fetchall()
+        
+        for row in rows:
+            pprint.pprint(row)
+        
+        cursor.close()
+
+
     # populate the flyer_items and stores tables with all the information from a single store
     def populate_tables(self, store):
         
