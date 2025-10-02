@@ -1,26 +1,22 @@
-# import pprint as pp
-# import urllib.request, json 
-# with urllib.request.urlopen("https://backflipp.wishabi.com/flipp/items/search?locale=en-ca&postal_code=K2T1J1&q=eggs") as url:
-    # data = json.load(url)
-
 import list_handler as lh
 import endpoint_dc as dc
 import pprint
 import os
+import database as db
 from dotenv import load_dotenv
 
 if __name__ == "__main__":
     load_dotenv()  # loads .env into environment
     postal_code = os.getenv("POSTAL_CODE")
+    host = os.getenv("HOST")
+    dbname = os.getenv("DBNAME")
+    user = os.getenv("USER")
+    password = os.getenv("PASSWORD")
+    port = os.getenv("PORT")
 
-    try:
-        with open("grocery_list.txt", "r") as file:
-            content = file.read()
-            print(content)
-    except FileNotFoundError:
-        print("Error: The file 'grocery_list.txt' was not found.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+
+    database = db.Database(postal_code,host,dbname,user,password,port)
+
 
 
 
