@@ -2,28 +2,29 @@ import requests
 import json
 import pprint
 
+
 class EndpointDC:
     
     def __init__(self, postal_code, grocery_list=[]):
         self.postal_code = postal_code
         self.grocery_list = grocery_list
     
-    def process_json(self, json_data, flyer_id):
+    def process_json(self, json_data, model, flyer_id):
         filtered_items = []
-        pprint.pprint(json_data)
         # Filter out neccessary fields, Subject to change depending on what fields are required
         for item in json_data:
             if item["price"] == '':
                 continue
             else:
+                
                 filtered_item = {
                     "name" : item["name"],
                     "price" : item["price"],
                     "cutout_image_url" : item["cutout_image_url"],
                     "valid_from": item["valid_from"],
                     "valid_to": item["valid_to"],
-                    "flyer_id": flyer_id
-
+                    "flyer_id": flyer_id,
+                    "embedding" : model.encode(item['name']).tolist()
                 }
                 filtered_items.append(filtered_item)
         return filtered_items
